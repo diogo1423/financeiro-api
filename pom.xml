@@ -52,10 +52,12 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-        <!-- Banco de Dados H2 -->
+        <!-- Banco de Dados PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <!-- LINHA CRÍTICA: Força o uso do driver correto e compatível -->
+            <version>42.7.3</version>
             <scope>runtime</scope>
         </dependency>
 

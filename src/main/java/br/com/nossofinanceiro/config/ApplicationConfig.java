@@ -16,20 +16,34 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 public class ApplicationConfig {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
+    // Injeta o UserRepository para que possamos usá-lo para buscar usuários
+    @Autowired
+    public ApplicationConfig(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    /**
+     * Define como o Spring Security deve carregar os detalhes de um usuário.
+     * Ele usa o seu UserRepository para buscar um usuário pelo nome de usuário.
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
     }
 
+    /**
+     * Configura o provedor de autenticação.
+     * Ele conecta o UserDetailsService (que busca o usuário) com o PasswordEncoder (que verifica a senha).
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -38,28 +52,43 @@ public class ApplicationConfig {
         return authProvider;
     }
 
+    /**
+     * Expõe o AuthenticationManager do Spring como um Bean para que possamos usá-lo
+     * no AuthController para autenticar os usuários.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Define o algoritmo de criptografia de senhas.
+     * Usamos BCrypt, que é o padrão e muito seguro.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Configura o CORS (Cross-Origin Resource Sharing) via código.
+     * Isso permite que seu frontend (rodando em localhost:8000, por exemplo)
+     * faça requisições para sua API (rodando em localhost:8080).
+     */
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // MUDANÇA AQUI: Permitir localhost e file://
-        configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedOrigins(List.of("http://localhost:*", "file://*", "null"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Permite que estas origens acessem a API
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8000", "http://localhost:3000", "file://"));
+        // Permite os métodos HTTP mais comuns
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
+        // Permite todos os cabeçalhos
         configuration.setAllowedHeaders(List.of("*"));
+        // Permite o envio de credenciais (como cookies ou tokens de autorização)
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/api/**", configuration); // Aplica a configuração para todos os endpoints da API
         return source;
     }
 }

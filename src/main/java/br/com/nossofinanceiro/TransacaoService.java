@@ -2,7 +2,7 @@ package br.com.nossofinanceiro;
 
 import br.com.nossofinanceiro.controller.TransacaoController.LancamentoRequest;
 import br.com.nossofinanceiro.security.User;
-import br.com.nossofinanceiro.security.UserRepository;
+import br.com.nossofinanceiro.security.UserRepository; // Importação que faltava
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,15 +20,16 @@ public class TransacaoService {
 
     @Autowired
     private TransacaoRepository transacaoRepository;
+
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository userRepository; // Agora o compilador sabe onde encontrar esta classe
 
     public record DashboardStats(double receitasMes, double despesasPagasMes, double balancoMes) {}
 
     private User getUsuarioLogado() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado."));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
     }
 
     public List<Transacao> criarLancamento(LancamentoRequest request) {
@@ -44,7 +45,7 @@ public class TransacaoService {
                 t.setCategoria(request.categoria());
                 t.setData(request.data().plusMonths(i - 1));
                 t.setTipo(TipoTransacao.valueOf(request.tipo()));
-                t.setTags(request.tags()); // NOVA LINHA
+                t.setTags(request.tags());
                 t.setParcelaAtual(i);
                 t.setTotalParcelas(request.numeroParcelas());
                 t.setUser(usuarioLogado);
@@ -58,7 +59,7 @@ public class TransacaoService {
             t.setCategoria(request.categoria());
             t.setData(request.data());
             t.setTipo(TipoTransacao.valueOf(request.tipo()));
-            t.setTags(request.tags()); // NOVA LINHA
+            t.setTags(request.tags());
             t.setPago(eReceita);
             t.setUser(usuarioLogado);
             transacoesSalvas.add(transacaoRepository.save(t));
@@ -105,7 +106,7 @@ public class TransacaoService {
         transacaoExistente.setCategoria(request.categoria());
         transacaoExistente.setData(request.data());
         transacaoExistente.setTipo(TipoTransacao.valueOf(request.tipo()));
-        transacaoExistente.setTags(request.tags()); // NOVA LINHA
+        transacaoExistente.setTags(request.tags());
 
         return transacaoRepository.save(transacaoExistente);
     }
