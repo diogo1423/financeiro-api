@@ -24,7 +24,6 @@ public class ApplicationConfig {
 
     private final UserRepository userRepository;
 
-    // Injeta o UserRepository para que possamos usá-lo para buscar usuários
     @Autowired
     public ApplicationConfig(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -72,14 +71,19 @@ public class ApplicationConfig {
 
     /**
      * Configura o CORS (Cross-Origin Resource Sharing) via código.
-     * Isso permite que seu frontend (rodando em localhost:8000, por exemplo)
-     * faça requisições para sua API (rodando em localhost:8080).
+     * Isso permite que seu frontend (rodando em localhost ou no Vercel)
+     * faça requisições para sua API (rodando no Render).
      */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Permite que estas origens acessem a API
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8000", "http://localhost:3000", "file://"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:8000",
+                "http://localhost:3000",
+                "https://frontend-diogo-morais-projects.vercel.app/", // <-- IMPORTANTE: ADICIONE A URL DO SEU FRONTEND AQUI
+                "file://"
+        ));
         // Permite os métodos HTTP mais comuns
         configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
         // Permite todos os cabeçalhos
@@ -88,7 +92,8 @@ public class ApplicationConfig {
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration); // Aplica a configuração para todos os endpoints da API
+        // Aplica a configuração de CORS para todos os endpoints que começam com /api/
+        source.registerCorsConfiguration("/api/**", configuration);
         return source;
     }
 }
