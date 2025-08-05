@@ -4,6 +4,7 @@ import br.com.nossofinanceiro.security.TokenService;
 import br.com.nossofinanceiro.security.User;
 import br.com.nossofinanceiro.security.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +32,9 @@ public class AuthController {
 
     @Autowired
     private TokenService tokenService;
+
+    @Value("${app.frontend-url}") // Injeta a URL do frontend a partir do application.properties
+    private String frontendUrl;
 
     // DTOs com validação
     public record LoginRequest(
@@ -135,15 +139,15 @@ public class AuthController {
         try {
             userService.verificarEmail(token);
 
-            // Redireciona para a página de login com mensagem de sucesso
+            // Redireciona para a URL do frontend com mensagem de sucesso
             return ResponseEntity.status(302)
-                    .header("Location", "http://localhost:8000/#/login?emailVerificado=true")
+                    .header("Location", frontendUrl + "/#/login?emailVerificado=true")
                     .build();
 
         } catch (RuntimeException e) {
-            // Redireciona para página de erro
+            // Redireciona para página de erro com a mensagem de erro
             return ResponseEntity.status(302)
-                    .header("Location", "http://localhost:8000/#/login?erro=" + e.getMessage())
+                    .header("Location", frontendUrl + "/#/login?erro=" + e.getMessage())
                     .build();
         }
     }
