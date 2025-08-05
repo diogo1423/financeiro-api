@@ -81,7 +81,8 @@ public class ApplicationConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:8000",
                 "http://localhost:3000",
-                "https://frontend-git-main-diogo-morais-projects.vercel.app", // CORRIGIDO: Sem a barra no final
+                "https://frontend-git-main-diogo-morais-projects.vercel.app",
+                "https://frontend-three-wine-78.vercel.app", // URL ADICIONADA
                 "file://"
         ));
         // Permite os métodos HTTP mais comuns
