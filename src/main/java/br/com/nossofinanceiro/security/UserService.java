@@ -1,6 +1,8 @@
 package br.com.nossofinanceiro.security;
 
-import br.com.nossofinanceiro.service.EmailService;
+// A importação do EmailService não é mais necessária aqui.
+// import br.com.nossofinanceiro.service.EmailService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,8 +20,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private EmailService emailService;
+    // A injeção do EmailService não é mais necessária.
+    // @Autowired
+    // private EmailService emailService;
 
     @Transactional
     public User registrar(User user) {
@@ -35,41 +38,20 @@ public class UserService {
         // Criptografa a senha
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // Gera token de verificação
-        String token = UUID.randomUUID().toString();
-        user.setTokenVerificacao(token);
-        user.setDataTokenVerificacao(LocalDateTime.now());
-        user.setEmailVerificado(false);
+        // ATIVA O USUÁRIO IMEDIATAMENTE
+        user.setEmailVerificado(true);
 
-        // Salva o usuário
-        User novoUsuario = userRepository.save(user);
+        // A lógica de token e envio de email foi removida.
 
-        // Envia email de verificação
-        emailService.enviarEmailVerificacao(user.getEmail(), user.getNome(), token);
-
-        return novoUsuario;
+        // Salva o usuário já ativo no banco de dados
+        return userRepository.save(user);
     }
 
     @Transactional
     public boolean verificarEmail(String token) {
-        User user = userRepository.findByTokenVerificacao(token)
-                .orElseThrow(() -> new RuntimeException("Token inválido"));
-
-        // Verifica se o token não expirou (24 horas)
-        if (user.getDataTokenVerificacao().plusHours(24).isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expirado");
-        }
-
-        // Ativa o usuário
-        user.setEmailVerificado(true);
-        user.setTokenVerificacao(null);
-        user.setDataTokenVerificacao(null);
-        userRepository.save(user);
-
-        // Envia email de boas-vindas
-        emailService.enviarEmailBoasVindas(user.getEmail(), user.getNome());
-
-        return true;
+        // Este método não é mais chamado, mas pode ser removido completamente
+        // junto com o endpoint no AuthController.
+        throw new UnsupportedOperationException("A verificação de email foi desativada.");
     }
 
     public User buscarPorUsername(String username) {
@@ -78,22 +60,7 @@ public class UserService {
     }
 
     public boolean reenviarEmailVerificacao(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email não encontrado"));
-
-        if (user.isEmailVerificado()) {
-            throw new RuntimeException("Email já verificado");
-        }
-
-        // Gera novo token
-        String token = UUID.randomUUID().toString();
-        user.setTokenVerificacao(token);
-        user.setDataTokenVerificacao(LocalDateTime.now());
-        userRepository.save(user);
-
-        // Reenvia email
-        emailService.enviarEmailVerificacao(user.getEmail(), user.getNome(), token);
-
-        return true;
+        // Este método também não é mais chamado e pode ser removido.
+        throw new UnsupportedOperationException("A verificação de email foi desativada.");
     }
 }

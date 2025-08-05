@@ -32,74 +32,42 @@ public class User implements UserDetails {
     private String password;
 
     @Column(nullable = false)
-    private boolean emailVerificado = false;
-
-    @Column
-    private String tokenVerificacao;
-
-    @Column
-    private LocalDateTime dataTokenVerificacao;
+    private boolean emailVerificado = false; // Mantemos o campo, mas agora ele será sempre 'true'
 
     @Column
     private LocalDateTime dataCriacao;
 
-    @Column
-    private LocalDateTime dataAtualizacao;
-
     @PrePersist
-    protected void onCreate() {
-        dataCriacao = LocalDateTime.now();
-        dataAtualizacao = LocalDateTime.now();
-    }
+    protected void onCreate() { dataCriacao = LocalDateTime.now(); }
 
-    @PreUpdate
-    protected void onUpdate() {
-        dataAtualizacao = LocalDateTime.now();
-    }
-
-    // Getters e Setters
+    // Getters e Setters ... (coloque os getters e setters para os campos restantes)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
-
-    @Override
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
-
-    @Override
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-
     public boolean isEmailVerificado() { return emailVerificado; }
     public void setEmailVerificado(boolean emailVerificado) { this.emailVerificado = emailVerificado; }
-
-    public String getTokenVerificacao() { return tokenVerificacao; }
-    public void setTokenVerificacao(String tokenVerificacao) { this.tokenVerificacao = tokenVerificacao; }
-
-    public LocalDateTime getDataTokenVerificacao() { return dataTokenVerificacao; }
-    public void setDataTokenVerificacao(LocalDateTime dataTokenVerificacao) {
-        this.dataTokenVerificacao = dataTokenVerificacao;
-    }
-
     public LocalDateTime getDataCriacao() { return dataCriacao; }
-    public LocalDateTime getDataAtualizacao() { return dataAtualizacao; }
+    public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }
+
 
     // Métodos UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
-
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return emailVerificado; }
+
+    // O método isEnabled() agora pode simplesmente retornar 'true'
+    @Override public boolean isEnabled() { return true; }
 }
