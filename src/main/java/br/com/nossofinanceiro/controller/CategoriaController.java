@@ -36,8 +36,28 @@ public class CategoriaController {
         Categoria novaCategoria = new Categoria();
         novaCategoria.setNome(request.nome());
         novaCategoria.setTipo(TipoTransacao.valueOf(request.tipo().toUpperCase()));
-        novaCategoria.setIcone(request.icone()); // NOVA LINHA
+        novaCategoria.setIcone(request.icone());
         Categoria categoriaSalva = categoriaService.criarCategoria(novaCategoria);
         return new ResponseEntity<>(categoriaSalva, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Categoria> atualizarCategoria(@PathVariable Long id, @RequestBody CategoriaRequest request) {
+        try {
+            Categoria categoriaAtualizada = categoriaService.atualizarCategoria(id, request);
+            return ResponseEntity.ok(categoriaAtualizada);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluirCategoria(@PathVariable Long id) {
+        try {
+            categoriaService.excluirCategoria(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
